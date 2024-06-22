@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright 2017 Nickolas J. Wilson
+# Copyright 2017, 2024 Nickolas J. Wilson
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class TestPunchClock(unittest.TestCase):
         with pc.PunchClock(self._SCRATCH) as clock:
             self.assertEqual(pc.State.OUT, clock.state)
         modified = pd.read_csv(self._SCRATCH)
-        pd.util.testing.assert_index_equal(self._INDEX, modified.columns)
+        pd.testing.assert_index_equal(self._INDEX, modified.columns)
 
     def test_init_header(self) -> None:
         """Test the method "__init__" with a log having a header."""
@@ -98,7 +98,7 @@ class TestPunchClock(unittest.TestCase):
             self.assertEqual(pc.State.OUT, clock.state)
         reopened = self._assert_recent_integral(self._SCRATCH, pc.State.OUT)
         reopened.loc[0, pc.State.OUT.value] = None
-        pd.util.testing.assert_frame_equal(original, reopened)
+        pd.testing.assert_frame_equal(original, reopened)
 
     def test_punch_out_out(self) -> None:
         """Test the method "punch_out" when clocked out."""
@@ -118,10 +118,11 @@ class TestPunchClock(unittest.TestCase):
             self.assertEqual(pc.State.OUT, clock.state)
         reopened = pd.read_csv(self._SCRATCH)
         original.loc[self._LAST_IDX, pc.State.OUT.value] = time.time()
-        pd.util.testing.assert_almost_equal(
+        pd.testing.assert_frame_equal(
             original,
             reopened,
-            check_dtype=False
+            check_dtype=False,
+            check_exact=False,
         )
 
     def test_sum_in(self) -> None:
@@ -251,7 +252,7 @@ class TestPunchClock(unittest.TestCase):
                 return_value = None
             self.assertEqual(state, clock.state)
         reopened = pd.read_csv(log_path)
-        pd.util.testing.assert_frame_equal(original, reopened)
+        pd.testing.assert_frame_equal(original, reopened)
         return return_value, original
 
     def _test_reset(self, log_path: pl.Path, state: pc.State) -> None:
@@ -268,4 +269,4 @@ class TestPunchClock(unittest.TestCase):
             self.assertEqual(pc.State.OUT, clock.state)
         has_header = pd.read_csv(self._HAS_HEADER)
         modified = pd.read_csv(self._SCRATCH)
-        pd.util.testing.assert_frame_equal(has_header, modified)
+        pd.testing.assert_frame_equal(has_header, modified)

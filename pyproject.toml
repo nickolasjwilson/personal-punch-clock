@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "personal-punch-clock"
+authors = [
+    {name = "Nickolas Wilson"},
+]
+description = "A bare-bones command-line punch clock"
+readme = "README.md"
+version = "1.0.0"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "pandas~=2.2",
+]
+keywords = ["punch clock", "time clock"]
+
+[project.optional-dependencies]
+dev = []
+
+[project.urls]
+Repository = "https://github.com/nickolasjwilson/personal-punch-clock"

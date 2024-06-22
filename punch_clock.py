@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 ###############################################################################
-# Copyright 2017 Nickolas J. Wilson
+# Copyright 2017, 2024 Nickolas J. Wilson
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -107,9 +107,7 @@ class PunchClock(object):
         """Punch in."""
         if self.state == State.OUT:
             now = self._get_current_time()
-            row = {State.IN.value: now, State.OUT.value: None}
-            rows = [row]
-            self._frame = self._frame.append(rows)
+            self._frame.loc[-1] = [now, None]
             self._state = State.IN
 
     def punch_out(self) -> None:
