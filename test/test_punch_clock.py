@@ -21,14 +21,13 @@ import pathlib as pl
 import shutil
 import time
 import typing as ty
-import unittest
 
 import pandas as pd
 
 import punch_clock as pc
 
 
-class TestPunchClock(unittest.TestCase):
+class TestPunchClock:
     """Tests the class "PunchClock"."""
 
     # pylint: disable=protected-access
@@ -41,8 +40,6 @@ class TestPunchClock(unittest.TestCase):
     _MANY_IN = _TEST_DIR / 'many_in.csv'
     _MANY_OUT = _TEST_DIR / 'many_out.csv'
     _SCRATCH = _TEST_DIR / 'scratch.csv'
-    _ZERO = 0
-    _ONE = 1
     _TOTAL_OUT = dt.timedelta(seconds=(1513607931 - 1513600731))
     _PART_MANY_IN = dt.timedelta(seconds=20478)
     _TOTAL_MANY_OUT = _PART_MANY_IN + dt.timedelta(seconds=12034)
@@ -54,7 +51,7 @@ class TestPunchClock(unittest.TestCase):
             self._SCRATCH.unlink()
         self._SCRATCH.touch()
         with pc.PunchClock(self._SCRATCH) as clock:
-            self.assertEqual(pc.State.OUT, clock.state)
+            assert clock.state == pc.State.OUT
         modified = pd.read_csv(self._SCRATCH)
         pd.testing.assert_index_equal(self._INDEX, modified.columns)
 
@@ -78,7 +75,7 @@ class TestPunchClock(unittest.TestCase):
             self._SCRATCH.unlink()
         with pc.PunchClock(self._SCRATCH) as clock:
             clock.punch_in()
-            self.assertEqual(pc.State.IN, clock.state)
+            assert clock.state == pc.State.IN
         self._assert_recent_integral(self._SCRATCH, pc.State.IN)
 
     def test_punch_in_in(self) -> None:
@@ -95,7 +92,7 @@ class TestPunchClock(unittest.TestCase):
         original = pd.read_csv(self._SCRATCH)
         with pc.PunchClock(self._SCRATCH) as clock:
             clock.punch_out()
-            self.assertEqual(pc.State.OUT, clock.state)
+            assert clock.state == pc.State.OUT
         reopened = self._assert_recent_integral(self._SCRATCH, pc.State.OUT)
         reopened.loc[0, pc.State.OUT.value] = None
         pd.testing.assert_frame_equal(original, reopened)
@@ -113,9 +110,9 @@ class TestPunchClock(unittest.TestCase):
         shutil.copy(str(self._MANY_IN), str(self._SCRATCH))
         original = pd.read_csv(self._SCRATCH)
         with pc.PunchClock(self._SCRATCH) as clock:
-            self.assertEqual(pc.State.IN, clock.state)
+            assert clock.state == pc.State.IN
             clock.punch_out()
-            self.assertEqual(pc.State.OUT, clock.state)
+            assert clock.state == pc.State.OUT
         reopened = pd.read_csv(self._SCRATCH)
         original.loc[self._LAST_IDX, pc.State.OUT.value] = time.time()
         pd.testing.assert_frame_equal(
@@ -199,7 +196,7 @@ class TestPunchClock(unittest.TestCase):
         frame = pd.read_csv(log_path)
         timestamp = frame[state.value][0]
         timestamp_int = int(timestamp)
-        self.assertEqual(timestamp, timestamp_int)
+        assert timestamp == timestamp_int
         now = time.time()
         diff = now - timestamp
         self._assert_small(diff)
@@ -212,8 +209,7 @@ class TestPunchClock(unittest.TestCase):
             value: A numeric value which should be non-negative and less
                 than one.
         """
-        self.assertLessEqual(self._ZERO, value)
-        self.assertGreaterEqual(self._ONE, value)
+        assert 0 <= value <= 1
 
     def _assert_nothing_changes(
             self,
@@ -242,15 +238,15 @@ class TestPunchClock(unittest.TestCase):
         """
         original = pd.read_csv(log_path)
         with pc.PunchClock(log_path) as clock:
-            self.assertEqual(state, clock.state)
+            assert clock.state == state
             if method_name:
                 method = getattr(clock, method_name)
                 return_value = method()
                 if expected_return_value:
-                    self.assertEqual(expected_return_value, return_value)
+                    assert return_value == expected_return_value
             else:
                 return_value = None
-            self.assertEqual(state, clock.state)
+            assert clock.state == state
         reopened = pd.read_csv(log_path)
         pd.testing.assert_frame_equal(original, reopened)
         return return_value, original
@@ -264,9 +260,9 @@ class TestPunchClock(unittest.TestCase):
         """
         shutil.copy(str(log_path), str(self._SCRATCH))
         with pc.PunchClock(self._SCRATCH) as clock:
-            self.assertEqual(state, clock.state)
+            assert clock.state == state
             clock.reset()
-            self.assertEqual(pc.State.OUT, clock.state)
+            assert clock.state == pc.State.OUT
         has_header = pd.read_csv(self._HAS_HEADER)
         modified = pd.read_csv(self._SCRATCH)
         pd.testing.assert_frame_equal(has_header, modified)

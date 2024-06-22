@@ -20,7 +20,9 @@ dependencies = [
 keywords = ["punch clock", "time clock"]
 
 [project.optional-dependencies]
-dev = []
+dev = [
+    "pytest~=8.2",
+]
 
 [project.urls]
 Repository = "https://github.com/nickolasjwilson/personal-punch-clock"
