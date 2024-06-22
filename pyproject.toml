@@ -24,3 +24,6 @@ dev = []
 
 [project.urls]
 Repository = "https://github.com/nickolasjwilson/personal-punch-clock"
+
+[project.scripts]
+punch-clock = "punch_clock:main"
