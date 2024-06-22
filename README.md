@@ -2,15 +2,10 @@
 Personal Punch Clock is a bare-bones command-line punch clock.
 
 ## Installation
-You must have Python 3.4 or newer installed.
-Install the dependencies:
+Install Personal Punch Clock using [`pip`](https://pip.pypa.io/en/stable/):
 ```shell
-pip install -r requirements.txt
+pip install personal-punch-clock
 ```
-Rename the file `punch_clock.py` to `punch-clock`,
-make it executable,
-and copy it to a directory which your operating system searches
-for executable files (e.g., `$HOME/bin`).
 
 
 ## Usage
