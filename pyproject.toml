@@ -21,6 +21,7 @@ keywords = ["punch clock", "time clock"]
 
 [project.optional-dependencies]
 dev = [
+    "invoke~=2.2",
     "pytest~=8.2",
 ]
 
