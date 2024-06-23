@@ -33,13 +33,13 @@ class TestPunchClock:
     # pylint: disable=protected-access
 
     _INDEX = pd.Index(pc.PunchClock._COLUMN_NAMES)
-    _TEST_DIR = pl.Path('test')
-    _HAS_HEADER = _TEST_DIR / 'has_header.csv'
-    _IN = _TEST_DIR / 'in.csv'
-    _OUT = _TEST_DIR / 'out.csv'
-    _MANY_IN = _TEST_DIR / 'many_in.csv'
-    _MANY_OUT = _TEST_DIR / 'many_out.csv'
-    _SCRATCH = _TEST_DIR / 'scratch.csv'
+    _TEST_DIR = pl.Path("test")
+    _HAS_HEADER = _TEST_DIR / "has_header.csv"
+    _IN = _TEST_DIR / "in.csv"
+    _OUT = _TEST_DIR / "out.csv"
+    _MANY_IN = _TEST_DIR / "many_in.csv"
+    _MANY_OUT = _TEST_DIR / "many_out.csv"
+    _SCRATCH = _TEST_DIR / "scratch.csv"
     _TOTAL_OUT = dt.timedelta(seconds=(1513607931 - 1513600731))
     _PART_MANY_IN = dt.timedelta(seconds=20478)
     _TOTAL_MANY_OUT = _PART_MANY_IN + dt.timedelta(seconds=12034)
@@ -57,17 +57,11 @@ class TestPunchClock:
 
     def test_init_header(self) -> None:
         """Test the method "__init__" with a log having a header."""
-        self._assert_nothing_changes(
-            self._HAS_HEADER,
-            pc.State.OUT
-        )
+        self._assert_nothing_changes(self._HAS_HEADER, pc.State.OUT)
 
     def test_init_in(self) -> None:
         """Test the method "__init__" with the user clocked in."""
-        self._assert_nothing_changes(
-            self._IN,
-            pc.State.IN
-        )
+        self._assert_nothing_changes(self._IN, pc.State.IN)
 
     def test_punch_in_first(self) -> None:
         """Test the method "punch_in" with no clock punches."""
@@ -81,9 +75,7 @@ class TestPunchClock:
     def test_punch_in_in(self) -> None:
         """Test the method "punch_in" when clocked in."""
         self._assert_nothing_changes(
-            self._IN,
-            pc.State.IN,
-            pc.PunchClock.punch_in.__name__
+            self._IN, pc.State.IN, pc.PunchClock.punch_in.__name__
         )
 
     def test_punch_out_in(self) -> None:
@@ -100,9 +92,7 @@ class TestPunchClock:
     def test_punch_out_out(self) -> None:
         """Test the method "punch_out" when clocked out."""
         self._assert_nothing_changes(
-            self._OUT,
-            pc.State.OUT,
-            pc.PunchClock.punch_out.__name__
+            self._OUT, pc.State.OUT, pc.PunchClock.punch_out.__name__
         )
 
     def test_punch_out_many_in(self) -> None:
@@ -125,9 +115,7 @@ class TestPunchClock:
     def test_sum_in(self) -> None:
         """Test the method "sum" when clocked in."""
         total, original = self._assert_nothing_changes(
-            self._IN,
-            pc.State.IN,
-            pc.PunchClock.sum.__name__
+            self._IN, pc.State.IN, pc.PunchClock.sum.__name__
         )
         clocked_in = original[pc.State.IN.value][0]
         now = time.time()
@@ -143,15 +131,13 @@ class TestPunchClock:
             self._OUT,
             pc.State.OUT,
             pc.PunchClock.sum.__name__,
-            self._TOTAL_OUT
+            self._TOTAL_OUT,
         )
 
     def test_sum_many_in(self) -> None:
         """Test the method "sum" with many punches when clocked in."""
         total, original = self._assert_nothing_changes(
-            self._MANY_IN,
-            pc.State.IN,
-            pc.PunchClock.sum.__name__
+            self._MANY_IN, pc.State.IN, pc.PunchClock.sum.__name__
         )
         clocked_in = original[pc.State.IN.value].iloc[-1]
         now = time.time()
@@ -168,7 +154,7 @@ class TestPunchClock:
             self._MANY_OUT,
             pc.State.OUT,
             pc.PunchClock.sum.__name__,
-            self._TOTAL_MANY_OUT
+            self._TOTAL_MANY_OUT,
         )
 
     def test_reset_out(self) -> None:
@@ -180,10 +166,8 @@ class TestPunchClock:
         self._test_reset(self._MANY_IN, pc.State.IN)
 
     def _assert_recent_integral(
-            self,
-            log_path: pl.Path,
-            state: pc.State
-        ) -> pd.DataFrame:
+        self, log_path: pl.Path, state: pc.State
+    ) -> pd.DataFrame:
         """Assert that a timestamp is both recent and integral.
 
         Args:
@@ -212,12 +196,12 @@ class TestPunchClock:
         assert 0 <= value <= 1
 
     def _assert_nothing_changes(
-            self,
-            log_path: pl.Path,
-            state: pc.State,
-            method_name: str = None,
-            expected_return_value: dt.timedelta = None
-        ) -> ty.Tuple[dt.timedelta, pd.DataFrame]:
+        self,
+        log_path: pl.Path,
+        state: pc.State,
+        method_name: str = None,
+        expected_return_value: dt.timedelta = None,
+    ) -> ty.Tuple[dt.timedelta, pd.DataFrame]:
         """Assert that nothing changes.
 
         Instantiation of a punch clock should not alter the punch log.

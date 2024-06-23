@@ -41,8 +41,8 @@ class State(enum.Enum):
 
     # pylint: disable=invalid-name
 
-    IN = 'In'
-    OUT = 'Out'
+    IN = "In"
+    OUT = "Out"
 
 
 class PunchClock(object):
@@ -59,7 +59,7 @@ class PunchClock(object):
     """
 
     _COLUMN_NAMES = (State.IN.value, State.OUT.value)
-    _NO_DECIMAL_POINT = '%.0f'
+    _NO_DECIMAL_POINT = "%.0f"
     _NULL_REPLACEMENT = 0
 
     def __init__(self, log_path: pl.Path) -> None:
@@ -74,16 +74,15 @@ class PunchClock(object):
             self._frame = pd.read_csv(log_path)
         except (FileNotFoundError, pd.errors.EmptyDataError):
             self.reset()
-        if (
-                not self._frame[State.OUT.value].empty
-                and pd.isnull(self._frame[State.OUT.value].iloc[-1])
+        if not self._frame[State.OUT.value].empty and pd.isnull(
+            self._frame[State.OUT.value].iloc[-1]
         ):
             self._state = State.IN
         else:
             self._state = State.OUT
         self._log_path = log_path
 
-    def __enter__(self) -> 'PunchClock':
+    def __enter__(self) -> "PunchClock":
         """Return this object."""
         return self
 
@@ -93,9 +92,7 @@ class PunchClock(object):
         # <http://pandas.pydata.org/pandas-docs/stable/gotchas.html#support-for-integer-na>,
         # so the timestamps are stored as floating-point numbers.
         self._frame.to_csv(
-            self._log_path,
-            index=False,
-            float_format=self._NO_DECIMAL_POINT
+            self._log_path, index=False, float_format=self._NO_DECIMAL_POINT
         )
 
     @property
@@ -147,34 +144,25 @@ class PunchClock(object):
         return int(current_time)
 
 
-_LOG_PATH = pl.Path.home() / '.punch_clock'
+_LOG_PATH = pl.Path.home() / ".punch_clock"
 _MESSAGE_TEMPLATE = st.Template(
-    'You have worked ${time}; you are clocked ${state}.'
+    "You have worked ${time}; you are clocked ${state}."
 )
 
 
 def main():
     """Execute this script's main functionality."""
-    parser = ap.ArgumentParser(description='personal punch clock')
+    parser = ap.ArgumentParser(description="personal punch clock")
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        '-i',
-        '--in',
-        action='store_true',
-        help='punch in',
-        dest='in_'
+        "-i", "--in", action="store_true", help="punch in", dest="in_"
     )
+    group.add_argument("-o", "--out", action="store_true", help="punch out")
     group.add_argument(
-        '-o',
-        '--out',
-        action='store_true',
-        help='punch out'
-    )
-    group.add_argument(
-        '-r',
-        '--reset',
-        action='store_true',
-        help='delete the stored clock punches'
+        "-r",
+        "--reset",
+        action="store_true",
+        help="delete the stored clock punches",
     )
     args = parser.parse_args()
     with PunchClock(_LOG_PATH) as clock:
@@ -188,11 +176,10 @@ def main():
         clocked_state = clock.state.value.lower()
     work_time_str = str(work_time)
     message = _MESSAGE_TEMPLATE.substitute(
-        time=work_time_str,
-        state=clocked_state
+        time=work_time_str, state=clocked_state
     )
     print(message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
