@@ -5,9 +5,9 @@ import invoke
 
 @invoke.task
 def format(context: invoke.context.Context) -> None:
-    context.run("black *.py test", pty=True)
+    context.run("black *.py test")
 
 
 @invoke.task
 def test(context: invoke.context.Context) -> None:
-    context.run("pytest test", pty=True)
+    context.run("pytest test")
