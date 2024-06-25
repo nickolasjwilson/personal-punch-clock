@@ -23,6 +23,7 @@ keywords = ["punch clock", "time clock"]
 dev = [
     "black~=24.4",
     "invoke~=2.2",
+    "isort~=5.13",
     "pytest~=8.2",
 ]
 
