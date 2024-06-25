@@ -4,6 +4,11 @@ import invoke
 
 
 @invoke.task
+def check(context: invoke.context.Context) -> None:
+    context.run("mypy *.py test")
+
+
+@invoke.task
 def format(context: invoke.context.Context) -> None:
     context.run("isort *.py test")
     context.run("black *.py test")

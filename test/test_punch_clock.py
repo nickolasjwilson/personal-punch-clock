@@ -199,8 +199,8 @@ class TestPunchClock:
         self,
         log_path: pl.Path,
         state: pc.State,
-        method_name: str = None,
-        expected_return_value: dt.timedelta = None,
+        method_name: str | None = None,
+        expected_return_value: dt.timedelta | None = None,
     ) -> ty.Tuple[dt.timedelta, pd.DataFrame]:
         """Assert that nothing changes.
 
