@@ -29,9 +29,15 @@ import pytest
 
 import punch_clock as pc
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access,redefined-outer-name
 
 _TEST_DIR = pl.Path("test")
+
+
+@pytest.fixture
+def tmp_log(tmp_path: pl.Path) -> pl.Path:
+    """The file system path to a temporary log file."""
+    return tmp_path / "log"
 
 
 class TestPunchClock:
@@ -43,20 +49,17 @@ class TestPunchClock:
     _OUT = _TEST_DIR / "out.csv"
     _MANY_IN = _TEST_DIR / "many_in.csv"
     _MANY_OUT = _TEST_DIR / "many_out.csv"
-    _SCRATCH = _TEST_DIR / "scratch.csv"
     _TOTAL_OUT = dt.timedelta(seconds=1513607931 - 1513600731)
     _PART_MANY_IN = dt.timedelta(seconds=20478)
     _TOTAL_MANY_OUT = _PART_MANY_IN + dt.timedelta(seconds=12034)
     _LAST_IDX = 2
 
-    def test_init_blank(self) -> None:
+    def test_init_blank(self, tmp_log: pl.Path) -> None:
         """Tests the method "__init__" with a blank log."""
-        if self._SCRATCH.exists():
-            self._SCRATCH.unlink()
-        self._SCRATCH.touch()
-        with pc.PunchClock(self._SCRATCH) as clock:
+        tmp_log.touch()
+        with pc.PunchClock(tmp_log) as clock:
             assert clock.state == pc.State.OUT
-        modified = pd.read_csv(self._SCRATCH)
+        modified = pd.read_csv(tmp_log)
         pd.testing.assert_index_equal(self._INDEX, modified.columns)
 
     def test_init_header(self) -> None:
@@ -67,14 +70,12 @@ class TestPunchClock:
         """Tests the method "__init__" with the user clocked in."""
         self._assert_nothing_changes(self._IN, pc.State.IN)
 
-    def test_punch_in_first(self) -> None:
+    def test_punch_in_first(self, tmp_log: pl.Path) -> None:
         """Tests the method "punch_in" with no clock punches."""
-        if self._SCRATCH.exists():
-            self._SCRATCH.unlink()
-        with pc.PunchClock(self._SCRATCH) as clock:
+        with pc.PunchClock(tmp_log) as clock:
             clock.punch_in()
             assert clock.state == pc.State.IN
-        self._assert_recent_integral(self._SCRATCH, pc.State.IN)
+        self._assert_recent_integral(tmp_log, pc.State.IN)
 
     def test_punch_in_in(self) -> None:
         """Tests the method "punch_in" when clocked in."""
@@ -82,14 +83,14 @@ class TestPunchClock:
             self._IN, pc.State.IN, pc.PunchClock.punch_in.__name__
         )
 
-    def test_punch_out_in(self) -> None:
+    def test_punch_out_in(self, tmp_log: pl.Path) -> None:
         """Tests the method "punch_out" when clocked in."""
-        shutil.copy(str(self._IN), str(self._SCRATCH))
-        original = pd.read_csv(self._SCRATCH)
-        with pc.PunchClock(self._SCRATCH) as clock:
+        shutil.copy(self._IN, tmp_log)
+        original = pd.read_csv(tmp_log)
+        with pc.PunchClock(tmp_log) as clock:
             clock.punch_out()
             assert clock.state == pc.State.OUT
-        reopened = self._assert_recent_integral(self._SCRATCH, pc.State.OUT)
+        reopened = self._assert_recent_integral(tmp_log, pc.State.OUT)
         reopened.loc[0, pc.State.OUT.value] = None
         pd.testing.assert_frame_equal(original, reopened)
 
@@ -99,15 +100,15 @@ class TestPunchClock:
             self._OUT, pc.State.OUT, pc.PunchClock.punch_out.__name__
         )
 
-    def test_punch_out_many_in(self) -> None:
+    def test_punch_out_many_in(self, tmp_log: pl.Path) -> None:
         """Tests the method "punch_out" with many punches when clocked in."""
-        shutil.copy(str(self._MANY_IN), str(self._SCRATCH))
-        original = pd.read_csv(self._SCRATCH)
-        with pc.PunchClock(self._SCRATCH) as clock:
+        shutil.copy(self._MANY_IN, tmp_log)
+        original = pd.read_csv(tmp_log)
+        with pc.PunchClock(tmp_log) as clock:
             assert clock.state == pc.State.IN
             clock.punch_out()
             assert clock.state == pc.State.OUT
-        reopened = pd.read_csv(self._SCRATCH)
+        reopened = pd.read_csv(tmp_log)
         original.loc[self._LAST_IDX, pc.State.OUT.value] = time.time()
         pd.testing.assert_frame_equal(
             original,
@@ -116,11 +117,10 @@ class TestPunchClock:
             check_exact=False,
         )
 
-    def test_sum_blank(self, tmp_path: pl.Path) -> None:
+    def test_sum_blank(self, tmp_log: pl.Path) -> None:
         """Tests the method "sum" with a blank log."""
-        log_path = tmp_path / "log"
-        log_path.touch()
-        with pc.PunchClock(log_path) as clock:
+        tmp_log.touch()
+        with pc.PunchClock(tmp_log) as clock:
             assert clock.sum() == dt.timedelta(0)
 
     def test_sum_in(self) -> None:
@@ -168,13 +168,13 @@ class TestPunchClock:
             self._TOTAL_MANY_OUT,
         )
 
-    def test_reset_out(self) -> None:
+    def test_reset_out(self, tmp_log: pl.Path) -> None:
         """Tests the method "reset" when clocked out."""
-        self._test_reset(self._MANY_OUT, pc.State.OUT)
+        self._test_reset(self._MANY_OUT, tmp_log, pc.State.OUT)
 
-    def test_reset_in(self) -> None:
+    def test_reset_in(self, tmp_log: pl.Path) -> None:
         """Tests the method "reset" when clocked in."""
-        self._test_reset(self._MANY_IN, pc.State.IN)
+        self._test_reset(self._MANY_IN, tmp_log, pc.State.IN)
 
     def _assert_recent_integral(
         self, log_path: pl.Path, state: pc.State
@@ -182,7 +182,7 @@ class TestPunchClock:
         """Assert that a timestamp is both recent and integral.
 
         Args:
-            log_path: The path to a clock punch log.
+            log_path: The file system path to a clock punch log.
             state: A state whose start the timestamp marks.
 
         Returns:
@@ -220,7 +220,7 @@ class TestPunchClock:
         punch clock's state.
 
         Args:
-            log_path: The path to a clock punch log.
+            log_path: The file system path to a clock punch log.
             state: The expected state of the punch clock.
             method_name: The name of a punch-clock method.
             expected_return_value: The value expected to be returned
@@ -246,20 +246,25 @@ class TestPunchClock:
         pd.testing.assert_frame_equal(original, reopened)
         return return_value, original
 
-    def _test_reset(self, log_path: pl.Path, state: pc.State) -> None:
+    def _test_reset(
+        self, source_log: pl.Path, temp_log: pl.Path, state: pc.State
+    ) -> None:
         """Tests the method "reset".
 
         Args:
-            log_path: The path to a clock punch log.
+            source_log: The file system path to a clock punch log which
+                is used as a starting point.
+            temp_log: The file system path for an editable copy of
+                `source_log`.
             state: The expected initial state of the punch clock.
         """
-        shutil.copy(str(log_path), str(self._SCRATCH))
-        with pc.PunchClock(self._SCRATCH) as clock:
+        shutil.copy(source_log, temp_log)
+        with pc.PunchClock(temp_log) as clock:
             assert clock.state == state
             clock.reset()
             assert clock.state == pc.State.OUT
         has_header = pd.read_csv(self._HAS_HEADER)
-        modified = pd.read_csv(self._SCRATCH)
+        modified = pd.read_csv(temp_log)
         pd.testing.assert_frame_equal(has_header, modified)
 
 
@@ -274,18 +279,16 @@ class TestPunchClock:
 )
 def test_main(
     capsys: pytest.CaptureFixture,
-    tmp_path: pl.Path,
+    tmp_log: pl.Path,
     name_space: ap.Namespace,
     state: str,
     work_time: str,
 ) -> None:
-    """Tests the function `main` with no arguments."""
+    """Tests the function `main`."""
     orginal_log_path = pc._LOG_PATH
-    file_name = "main.csv"
-    source = _TEST_DIR / file_name
-    destination = tmp_path / file_name
-    shutil.copy(source, destination)
-    pc._LOG_PATH = destination
+    source = _TEST_DIR / "main.csv"
+    shutil.copy(source, tmp_log)
+    pc._LOG_PATH = tmp_log
     with mock.patch("argparse.ArgumentParser.parse_args") as mock_parse_args:
         mock_parse_args.return_value = name_space
         pc.main()
