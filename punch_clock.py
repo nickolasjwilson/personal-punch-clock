@@ -45,7 +45,7 @@ class State(enum.Enum):
     OUT = "Out"
 
 
-class PunchClock(object):
+class PunchClock:
     """A single-user punch clock.
 
     Atttributes:

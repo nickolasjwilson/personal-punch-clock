@@ -26,6 +26,7 @@ dev = [
     "isort~=5.13",
     "mypy~=1.10",
     "pandas-stubs~=2.2",
+    "pylint~=3.2",
     "pytest~=8.2",
 ]
 

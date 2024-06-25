@@ -40,7 +40,7 @@ class TestPunchClock:
     _MANY_IN = _TEST_DIR / "many_in.csv"
     _MANY_OUT = _TEST_DIR / "many_out.csv"
     _SCRATCH = _TEST_DIR / "scratch.csv"
-    _TOTAL_OUT = dt.timedelta(seconds=(1513607931 - 1513600731))
+    _TOTAL_OUT = dt.timedelta(seconds=1513607931 - 1513600731)
     _PART_MANY_IN = dt.timedelta(seconds=20478)
     _TOTAL_MANY_OUT = _PART_MANY_IN + dt.timedelta(seconds=12034)
     _LAST_IDX = 2
