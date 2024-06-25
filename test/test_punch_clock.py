@@ -263,8 +263,23 @@ class TestPunchClock:
         pd.testing.assert_frame_equal(has_header, modified)
 
 
-def test_main(capsys: pytest.CaptureFixture, tmp_path: pl.Path) -> None:
-    """Tests the function `main`."""
+@pytest.mark.parametrize(
+    "name_space, state, work_time",
+    [
+        (ap.Namespace(in_=False, out=False, reset=False), "out", "2:26:49"),
+        (ap.Namespace(in_=True, out=False, reset=False), "in", "2:26:49"),
+        (ap.Namespace(in_=False, out=True, reset=False), "out", "2:26:49"),
+        (ap.Namespace(in_=False, out=False, reset=True), "out", "0:00:00"),
+    ],
+)
+def test_main(
+    capsys: pytest.CaptureFixture,
+    tmp_path: pl.Path,
+    name_space: ap.Namespace,
+    state: str,
+    work_time: str,
+) -> None:
+    """Tests the function `main` with no arguments."""
     orginal_log_path = pc._LOG_PATH
     file_name = "main.csv"
     source = _TEST_DIR / file_name
@@ -272,11 +287,12 @@ def test_main(capsys: pytest.CaptureFixture, tmp_path: pl.Path) -> None:
     shutil.copy(source, destination)
     pc._LOG_PATH = destination
     with mock.patch("argparse.ArgumentParser.parse_args") as mock_parse_args:
-        mock_parse_args.return_value = ap.Namespace(
-            in_=False, out=False, reset=False
-        )
+        mock_parse_args.return_value = name_space
         pc.main()
     captured = capsys.readouterr()
-    assert captured.out == "You have worked 2:26:49; you are clocked out.\n"
+    assert (
+        captured.out
+        == f"You have worked {work_time}; you are clocked {state}.\n"
+    )
     assert captured.err == ""
     pc._LOG_PATH = orginal_log_path
