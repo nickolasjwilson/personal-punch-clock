@@ -41,7 +41,7 @@ def tmp_log(tmp_path: pl.Path) -> pl.Path:
 
 
 class TestPunchClock:
-    """Tests the class "PunchClock"."""
+    """Tests the class `PunchClock`."""
 
     _INDEX = pd.Index(pc.PunchClock._COLUMN_NAMES)
     _HAS_HEADER = _TEST_DIR / "has_header.csv"
@@ -55,7 +55,7 @@ class TestPunchClock:
     _LAST_IDX = 2
 
     def test_init_blank(self, tmp_log: pl.Path) -> None:
-        """Tests the method "__init__" with a blank log."""
+        """Tests the method `__init__` with a blank log."""
         tmp_log.touch()
         with pc.PunchClock(tmp_log) as clock:
             assert clock.state == pc.State.OUT
@@ -63,28 +63,28 @@ class TestPunchClock:
         pd.testing.assert_index_equal(self._INDEX, modified.columns)
 
     def test_init_header(self) -> None:
-        """Tests the method "__init__" with a log having a header."""
+        """Tests the method `__init__` with a log having a header."""
         self._assert_nothing_changes(self._HAS_HEADER, pc.State.OUT)
 
     def test_init_in(self) -> None:
-        """Tests the method "__init__" with the user clocked in."""
+        """Tests the method `__init__` with the user clocked in."""
         self._assert_nothing_changes(self._IN, pc.State.IN)
 
     def test_punch_in_first(self, tmp_log: pl.Path) -> None:
-        """Tests the method "punch_in" with no clock punches."""
+        """Tests the method `punch_in` with no clock punches."""
         with pc.PunchClock(tmp_log) as clock:
             clock.punch_in()
             assert clock.state == pc.State.IN
         self._assert_recent_integral(tmp_log, pc.State.IN)
 
     def test_punch_in_in(self) -> None:
-        """Tests the method "punch_in" when clocked in."""
+        """Tests the method `punch_in` when clocked in."""
         self._assert_nothing_changes(
             self._IN, pc.State.IN, pc.PunchClock.punch_in.__name__
         )
 
     def test_punch_out_in(self, tmp_log: pl.Path) -> None:
-        """Tests the method "punch_out" when clocked in."""
+        """Tests the method `punch_out` when clocked in."""
         shutil.copy(self._IN, tmp_log)
         original = pd.read_csv(tmp_log)
         with pc.PunchClock(tmp_log) as clock:
@@ -95,13 +95,13 @@ class TestPunchClock:
         pd.testing.assert_frame_equal(original, reopened)
 
     def test_punch_out_out(self) -> None:
-        """Tests the method "punch_out" when clocked out."""
+        """Tests the method `punch_out` when clocked out."""
         self._assert_nothing_changes(
             self._OUT, pc.State.OUT, pc.PunchClock.punch_out.__name__
         )
 
     def test_punch_out_many_in(self, tmp_log: pl.Path) -> None:
-        """Tests the method "punch_out" with many punches when clocked in."""
+        """Tests the method `punch_out` with many punches when clocked in."""
         shutil.copy(self._MANY_IN, tmp_log)
         original = pd.read_csv(tmp_log)
         with pc.PunchClock(tmp_log) as clock:
@@ -118,13 +118,13 @@ class TestPunchClock:
         )
 
     def test_sum_blank(self, tmp_log: pl.Path) -> None:
-        """Tests the method "sum" with a blank log."""
+        """Tests the method `sum` with a blank log."""
         tmp_log.touch()
         with pc.PunchClock(tmp_log) as clock:
             assert clock.sum() == dt.timedelta(0)
 
     def test_sum_in(self) -> None:
-        """Tests the method "sum" when clocked in."""
+        """Tests the method `sum` when clocked in."""
         total, original = self._assert_nothing_changes(
             self._IN, pc.State.IN, pc.PunchClock.sum.__name__
         )
@@ -137,7 +137,7 @@ class TestPunchClock:
         self._assert_small(diff_seconds)
 
     def test_sum_out(self) -> None:
-        """Tests the method "sum" when clocked out."""
+        """Tests the method `sum` when clocked out."""
         self._assert_nothing_changes(
             self._OUT,
             pc.State.OUT,
@@ -146,7 +146,7 @@ class TestPunchClock:
         )
 
     def test_sum_many_in(self) -> None:
-        """Tests the method "sum" with many punches when clocked in."""
+        """Tests the method `sum` with many punches when clocked in."""
         total, original = self._assert_nothing_changes(
             self._MANY_IN, pc.State.IN, pc.PunchClock.sum.__name__
         )
@@ -160,7 +160,7 @@ class TestPunchClock:
         self._assert_small(diff_seconds)
 
     def test_sum_many_out(self) -> None:
-        """Tests the method "sum" with many punches when clocked out."""
+        """Tests the method `sum` with many punches when clocked out."""
         self._assert_nothing_changes(
             self._MANY_OUT,
             pc.State.OUT,
@@ -169,11 +169,11 @@ class TestPunchClock:
         )
 
     def test_reset_out(self, tmp_log: pl.Path) -> None:
-        """Tests the method "reset" when clocked out."""
+        """Tests the method `reset` when clocked out."""
         self._test_reset(self._MANY_OUT, tmp_log, pc.State.OUT)
 
     def test_reset_in(self, tmp_log: pl.Path) -> None:
-        """Tests the method "reset" when clocked in."""
+        """Tests the method `reset` when clocked in."""
         self._test_reset(self._MANY_IN, tmp_log, pc.State.IN)
 
     def _assert_recent_integral(
@@ -249,7 +249,7 @@ class TestPunchClock:
     def _test_reset(
         self, source_log: pl.Path, temp_log: pl.Path, state: pc.State
     ) -> None:
-        """Tests the method "reset".
+        """Tests the method `reset`.
 
         Args:
             source_log: The file system path to a clock punch log which
