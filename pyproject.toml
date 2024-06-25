@@ -28,6 +28,7 @@ dev = [
     "pandas-stubs~=2.2",
     "pylint~=3.2",
     "pytest~=8.2",
+    "pytest-cov~=5.0",
 ]
 
 [project.urls]

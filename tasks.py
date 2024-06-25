@@ -8,7 +8,7 @@ _ALL_PY_FILES = "*.py test"
 @invoke.task
 def test(context: invoke.context.Context) -> None:
     """Runs unit tests."""
-    context.run("pytest test")
+    context.run("pytest --cov-report term-missing --cov=punch_clock test")
 
 
 @invoke.task
