@@ -16,24 +16,28 @@
 """This module contains its namesake class."""
 
 
+import argparse as ap
 import datetime as dt
 import pathlib as pl
 import shutil
 import time
 import typing as ty
+from unittest import mock
 
 import pandas as pd
+import pytest
 
 import punch_clock as pc
+
+# pylint: disable=protected-access
+
+_TEST_DIR = pl.Path("test")
 
 
 class TestPunchClock:
     """Tests the class "PunchClock"."""
 
-    # pylint: disable=protected-access
-
     _INDEX = pd.Index(pc.PunchClock._COLUMN_NAMES)
-    _TEST_DIR = pl.Path("test")
     _HAS_HEADER = _TEST_DIR / "has_header.csv"
     _IN = _TEST_DIR / "in.csv"
     _OUT = _TEST_DIR / "out.csv"
@@ -257,3 +261,22 @@ class TestPunchClock:
         has_header = pd.read_csv(self._HAS_HEADER)
         modified = pd.read_csv(self._SCRATCH)
         pd.testing.assert_frame_equal(has_header, modified)
+
+
+def test_main(capsys: pytest.CaptureFixture, tmp_path: pl.Path) -> None:
+    """Tests the function `main`."""
+    orginal_log_path = pc._LOG_PATH
+    file_name = "main.csv"
+    source = _TEST_DIR / file_name
+    destination = tmp_path / file_name
+    shutil.copy(source, destination)
+    pc._LOG_PATH = destination
+    with mock.patch("argparse.ArgumentParser.parse_args") as mock_parse_args:
+        mock_parse_args.return_value = ap.Namespace(
+            in_=False, out=False, reset=False
+        )
+        pc.main()
+    captured = capsys.readouterr()
+    assert captured.out == "You have worked 2:26:49; you are clocked out.\n"
+    assert captured.err == ""
+    pc._LOG_PATH = orginal_log_path
