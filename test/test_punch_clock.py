@@ -112,6 +112,13 @@ class TestPunchClock:
             check_exact=False,
         )
 
+    def test_sum_blank(self, tmp_path: pl.Path) -> None:
+        """Tests the method "sum" with a blank log."""
+        log_path = tmp_path / "log"
+        log_path.touch()
+        with pc.PunchClock(log_path) as clock:
+            assert clock.sum() == dt.timedelta(0)
+
     def test_sum_in(self) -> None:
         """Tests the method "sum" when clocked in."""
         total, original = self._assert_nothing_changes(

@@ -60,7 +60,6 @@ class PunchClock:
 
     _COLUMN_NAMES = (State.IN.value, State.OUT.value)
     _NO_DECIMAL_POINT = "%.0f"
-    _NULL_REPLACEMENT = 0
 
     def __init__(self, log_path: pl.Path) -> None:
         """Initializes an instance of this class.
@@ -119,11 +118,7 @@ class PunchClock:
         elapsed_seconds_series = (
             self._frame[State.OUT.value] - self._frame[State.IN.value]
         )
-        elapsed_seconds_sum = elapsed_seconds_series.sum()
-        if pd.isnull(elapsed_seconds_sum):
-            elapsed_seconds = self._NULL_REPLACEMENT
-        else:
-            elapsed_seconds = elapsed_seconds_sum
+        elapsed_seconds = elapsed_seconds_series.sum()
         if self.state == State.IN:
             clocked_in = self._frame[State.IN.value].iloc[-1]
             now = self._get_current_time()
