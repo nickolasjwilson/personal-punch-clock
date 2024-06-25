@@ -63,7 +63,7 @@ class PunchClock:
     _NULL_REPLACEMENT = 0
 
     def __init__(self, log_path: pl.Path) -> None:
-        """Initialize an instance of this class.
+        """Initializes an instance of this class.
 
         Load the log of clock punches from disk.
 
@@ -83,11 +83,10 @@ class PunchClock:
         self._log_path = log_path
 
     def __enter__(self) -> "PunchClock":
-        """Return this object."""
         return self
 
     def __exit__(self, *_: ty.Any) -> None:
-        """Write the log of clock punches to disk."""
+        """Writes the log of clock punches to disk."""
         # Pandas cannot represent missing values in integer series
         # <http://pandas.pydata.org/pandas-docs/stable/gotchas.html#support-for-integer-na>,
         # so the timestamps are stored as floating-point numbers.
@@ -97,18 +96,18 @@ class PunchClock:
 
     @property
     def state(self) -> State:
-        """Return the corresponding attribute."""
+        """Returns the state of the punch clock."""
         return self._state
 
     def punch_in(self) -> None:
-        """Punch in."""
+        """Punches in."""
         if self.state == State.OUT:
             now = self._get_current_time()
             self._frame.loc[-1] = [now, None]
             self._state = State.IN
 
     def punch_out(self) -> None:
-        """Punch out."""
+        """Punches out."""
         if self.state == State.IN:
             now = self._get_current_time()
             last_idx = self._frame.shape[0] - 1
@@ -116,7 +115,7 @@ class PunchClock:
             self._state = State.OUT
 
     def sum(self) -> dt.timedelta:
-        """Return the time worked."""
+        """Returns the time worked."""
         elapsed_seconds_series = (
             self._frame[State.OUT.value] - self._frame[State.IN.value]
         )
@@ -133,13 +132,13 @@ class PunchClock:
         return dt.timedelta(seconds=elapsed_seconds_int)
 
     def reset(self) -> None:
-        """Reset the log of clock punches."""
+        """Resets the log of clock punches."""
         self._frame = pd.DataFrame(columns=self._COLUMN_NAMES)
         self._state = State.OUT
 
     @staticmethod
     def _get_current_time() -> int:
-        """Return the number of seconds since 1970-01-01 00:00:00 UTC."""
+        """Returns the number of seconds since 1970-01-01 00:00:00 UTC."""
         current_time = time.time()
         return int(current_time)
 
@@ -151,7 +150,7 @@ _MESSAGE_TEMPLATE = st.Template(
 
 
 def main():
-    """Execute this script's main functionality."""
+    """Executes this script's main functionality."""
     parser = ap.ArgumentParser(description="personal punch clock")
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
